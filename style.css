@@ -1,0 +1,104 @@
+* {
+  min-height: 0;
+  min-width: 0;
+  font-family: Lexend, "JetBrainsMono NFP";
+  font-size: 13px;
+  font-weight: 600;
+  /*BURAYA PADDING MARGIN VS EKLEDIGINDE KATLANARAK BUYUYOR EFEKT*/
+}
+
+window#waybar {
+  transition-property: background-color;
+  transition-duration: 0.5s;
+  background-color: transparent;
+}
+
+/*
+margin (DIS BOSLUK) top right bottom left
+PADDING (IC BOSLUK2 )
+sadece 10 px dersen sol sag ust alt heryerden 10px birakir
+margin: 10px 20px; üst/alt = 10px sağ/sol = 20px yapar vay aq
+*/
+
+#workspaces {
+    background: #11111B;
+    padding: 0px 0px;
+    border-radius: 16px;
+    border: solid 0px #cdd6f4;
+    font-weight: normal;
+    font-style: normal;
+    padding: 0.15rem;
+    margin: 0.5rem 0.2rem 0rem 0rem;
+}
+
+#workspaces button {
+    color: #cdd6f4;
+    background-color: transparent;
+    border-radius: 16px;
+    min-width: 30px;
+    transition: all 0.2s ease-in-out;
+}
+
+#workspaces button.active {
+    color: #cdd6f4;
+    background-color: #cdd6f4;
+    border-radius: 16px;
+    min-width: 80px;
+    transition: all 0.2s ease-in-out;
+}
+
+#workspaces button:hover {
+    background-color: transparent;
+    color: transparent;
+    border-radius: 16px;
+    min-width: 40px;
+    background-size: 400% 400%;
+}
+
+#network,
+#custom-power,
+#cpu,
+#memory,
+#clock,
+#custom-uptime,
+#window {
+
+  padding: 0.15rem 1rem;
+  margin: 0.5rem 0.2rem 0.7rem 0rem;
+  border-radius: 1rem;
+  /* background-color: #181825; */
+  background-color: #1e1e2e;
+}
+
+
+#network {
+  color: peru;
+}
+
+#custom-uptime{
+  color: seashell;
+}
+
+#cpu {
+  color: #94e2d5;
+}
+
+#memory {
+  color: #cba6f7;
+}
+
+#clock {
+  color: #74c7ec;
+}
+
+#clock.simpleclock {
+  color: #89b4fa;
+}
+
+#window {
+  color: #cdd6f4;
+}
+
+#custom-power {
+  color: #f38ba8;
+}
