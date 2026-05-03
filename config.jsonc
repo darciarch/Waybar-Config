@@ -10,7 +10,6 @@
 
   "modules-left": [
     "clock",
-    "clock#simpleclock",
     "hyprland/window"
   ],
 
@@ -19,11 +18,11 @@
   ],
 
   "modules-right": [
+    "custom/focus",
     "custom/uptime",
     "network",
     "cpu",
-    "memory",
-    "custom/power"
+    "memory"
   ],
   "hyprland/workspaces": {
     "on-click": "activate",
@@ -43,12 +42,8 @@
     "icon" : true,
     "icon-size" : 16
   },
-  "clock#simpleclock": {
-    "tooltip": false,
-    "format": " {:%H:%M}"
-  },
   "clock": {
-    "format": " {:L%a %d %b}",
+    "format": " {:%H:%M}",
     "calendar": {
       "format": {
         "days": "<span weight='normal'>{}</span>",
@@ -71,26 +66,26 @@
   "memory": {
     "format": " {used:0.1f}Gi"
   },
-  "custom/power": {
-    "tooltip": false,
-    "on-click": "wlogout -p layer-shell &",
-    "format": "⏻"
-  },
   "custom/uptime": {
     "format": " {}",
-    "exec": "uptime -p | sed 's/^up //'",
+    "exec": "uptime -p | sed 's/up //; s/ days,/d/; s/ day,/d/; s/ hours,/h/; s/ hour,/h/; s/ minutes/m/; s/ minute/m/'",
     "interval": 60
   },
   "network": {
     "interface": "wlan0",
     "format": "{ifname}",
-    "format-wifi": "{essid} ({signalStrength}%) ",
-    "format-ethernet": "{ipaddr}/{cidr} 󰊗",
-    "format-disconnected": "", //An empty format will hide the module.
+    "format-wifi": " {signalStrength}%",
+    "format-ethernet": "󰊗 {ipaddr}",
+    "format-disconnected": "",
     "tooltip-format": "{ifname} via {gwaddr} 󰊗",
-    "tooltip-format-wifi": "{essid} ({signalStrength}%) ",
+    "tooltip-format-wifi": "Network: {essid}\n Signal: {signalStrength}%",
     "tooltip-format-ethernet": "{ifname} ",
-    "tooltip-format-disconnected": "Disconnected",
+    "tooltip-format-disconnected": "No Connection",
     "max-length": 50
+  },
+  "custom/focus": {
+    "format": "focus",
+    "on-click": "$HOME/.config/waybar/scripts/focus.sh",
+    "tooltip": false
   }
 }
