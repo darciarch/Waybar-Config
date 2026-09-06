@@ -1,3 +1,5 @@
+![Showcase](images/waybar.png)
+
 # Waybar config
 
 A personal [Waybar](https://github.com/Alexays/Waybar) (v0.15.x) status bar for **Hyprland on Arch**,
