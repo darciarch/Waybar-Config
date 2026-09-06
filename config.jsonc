@@ -1,7 +1,7 @@
 {
   "layer": "top",
   "position": "top",
-  "height": 39,
+  "height": 20,
   "spacing": 2,
   "exclusive": true,
   "gtk-layer-shell": true,
@@ -22,7 +22,6 @@
     "battery",
     "backlight",
     "wireplumber",
-    "custom/focus",
     "custom/uptime",
     "custom/wifi",
     "custom/sysinfo",
@@ -134,7 +133,8 @@
     "return-type": "json",
     "exec": "$HOME/.config/waybar/scripts/sysinfo.sh",
     "interval": 2,
-    "tooltip": true
+    "tooltip": true,
+    "on-click": "$HOME/.config/waybar/scripts/focus.sh"
   },
   "custom/swaync": {
     "format": "{icon}",
@@ -154,11 +154,6 @@
     "on-click": "swaync-client -t -sw",
     "on-click-right": "swaync-client -d -sw",
     "escape": true,
-    "tooltip": false
-  },
-  "custom/focus": {
-    "format": "focus",
-    "on-click": "$HOME/.config/waybar/scripts/focus.sh",
     "tooltip": false
   }
 }

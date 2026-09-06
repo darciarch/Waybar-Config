@@ -28,7 +28,7 @@ padding (inner spacing)
     font-weight: normal;
     font-style: normal;
     padding: 0.15rem;
-    margin: 0.5rem 0.2rem 0rem 0rem;
+    margin: 0.15rem 0rem 0rem 0rem;
 }
 
 #workspaces button {
@@ -61,7 +61,7 @@ padding (inner spacing)
 #power-profiles-daemon,
 #backlight,
 #wireplumber,
-#custom-focus,
+#clock,
 #custom-uptime,
 #custom-wifi,
 #custom-sysinfo,
@@ -69,18 +69,15 @@ padding (inner spacing)
 #window {
 
   padding: 0.15rem 0.7rem;
-  margin: 0.5rem 0.2rem 0.7rem 0rem;
+  margin: 0.15rem 0.2rem 1rem 0rem;
   border-radius: 1rem;
   /* background-color: #181825; */
   background-color: #1e1e2e;
 }
 
 #clock {
-  padding: 0.15rem 0.7rem 0.15rem 0.7rem;
-  margin: 0.5rem 0.2rem 0.7rem 0.15rem;
-  border-radius: 1rem;
-  /* background-color: #181825; */
-  background-color: #1e1e2e;
+  padding: 0.15rem 0.7rem;
+  margin: 0.15rem 0.2rem 1rem 0.15rem;
 }
 
 /* old network → custom/wifi (nmcli + bluetoothctl), color preserved */
@@ -104,11 +101,6 @@ padding (inner spacing)
 
 #custom-uptime.paused {
   color: #f9e2af;
-}
-
-#custom-focus{
-  color: #f38ba8;
-  transition: all 0.2s ease-in-out;
 }
 
 /* battery + power profile — two independent, fully-rounded capsules;
@@ -140,9 +132,34 @@ padding (inner spacing)
   color: #94e2d5;
 }
 
-/* old cpu + memory pair → custom/sysinfo (single icon) */
+/* old cpu + memory pair → custom/sysinfo (single icon).
+   Doubles as the session-reset button (on-click → focus.sh): a slow resting
+   glow plus hover/press states signal that the capsule is clickable. This is
+   the one deliberate animation on the bar. */
+@keyframes sysinfo-pulse {
+  0%   { text-shadow: 0 0 0 rgba(116, 199, 236, 0); }
+  50%  { text-shadow: 0 0 6px rgba(116, 199, 236, 0.75); }
+  100% { text-shadow: 0 0 0 rgba(116, 199, 236, 0); }
+}
+
 #custom-sysinfo {
   color: #74c7ec;
+  transition: color 0.2s ease-in-out,
+              padding 0.2s ease-in-out,
+              background-color 0.2s ease-in-out;
+  animation: sysinfo-pulse 3s ease-in-out infinite;
+}
+
+#custom-sysinfo:hover {
+  color: #89dceb;
+  padding: 0.15rem 1.6rem;
+  background-color: #313244;
+  animation: none;
+}
+
+#custom-sysinfo:active {
+  color: #1e1e2e;
+  background-color: #74c7ec;
 }
 
 #custom-sysinfo.warning {
@@ -168,9 +185,4 @@ padding (inner spacing)
 
 #window {
   color: #cdd6f4;
-}
-
-#custom-focus:hover{
-  color: #74c7ec;
-  padding: 0.15rem 2rem;
 }

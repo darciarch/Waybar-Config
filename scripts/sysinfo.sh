@@ -2,6 +2,7 @@
 # custom/sysinfo — CPU + RAM in one capsule, single icon (no numbers). When a threshold
 # is crossed the CSS class changes (normal → warning → critical) and the color turns
 # orange/red. Exact numbers only in the hover tooltip. Dependency: jq. Called with `interval: 2`.
+# on-click (set in config.jsonc) runs scripts/focus.sh — the session-reset button.
 
 cpu_snap() { awk '/^cpu /{t=0; for(i=2;i<=NF;i++) t+=$i; print t, $5+$6}' /proc/stat; }
 
@@ -21,7 +22,7 @@ if   (( cpu > 90 || ram_pct > 90 )); then class="critical"
 elif (( cpu > 70 || ram_pct > 80 )); then class="warning"
 fi
 
-tooltip="CPU  ·  ${cpu}%"$'\n'"RAM  ·  ${ram_gi} Gi  (${ram_pct}%)"
+tooltip="CPU  ·  ${cpu}%"$'\n'"RAM  ·  ${ram_gi} Gi  (${ram_pct}%)"$'\n'"Click → focus (session reset)"
 
 icon=$'\uf4bc'   # nf-oct-cpu
 jq -cn --arg text "$icon" --arg tooltip "$tooltip" --arg class "$class" \

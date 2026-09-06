@@ -1,5 +1,5 @@
 #!/bin/bash
-# custom/focus click handler — SESSION RESET button.
+# custom/sysinfo on-click handler — SESSION RESET button.
 # Closes every Hyprland window, then opens a fixed app set onto workspaces 1/3/4/5.
 #
 # NOTE: Hyprland runs a Lua config on this machine; `hyprctl dispatch` no longer accepts
