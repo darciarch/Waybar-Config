@@ -40,6 +40,9 @@ killall -SIGUSR2 waybar
 | right    | battery, backlight, volume (wireplumber), uptime, wifi, sysinfo, swaync |
 
 - **clock** — `H:M`, calendar in the tooltip
+- **custom/window** — active window title, cleaned (leading status glyphs and a trailing ` — App`
+  suffix stripped) and scaled down in steps so it always fits, with a fixed window glyph prefix
+  (`scripts/window.py`)
 - **power-profiles-daemon** — click cycles the power profile
 - **battery** — icon + %, color-only warning/critical (no blink)
 - **volume** — scroll to change; left click mutes output; right click opens `pavucontrol`.

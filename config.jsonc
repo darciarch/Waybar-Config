@@ -11,7 +11,7 @@
   "modules-left": [
     "clock",
     "power-profiles-daemon",
-    "hyprland/window"
+    "custom/window"
   ],
 
   "modules-center": [
@@ -37,14 +37,12 @@
       "*": 3
     }
   },
-  "hyprland/window": {
-    "format": "{title}",
-    "max-length": 34,
-    "rewrite": {
-        "^$": "OH HEEL NA!"
-    },
-    "icon" : true,
-    "icon-size" : 16
+  "custom/window": {
+    "format": "{}",
+    "exec": "$HOME/.config/waybar/scripts/window.py",
+    "return-type": "json",
+    "escape": false,
+    "max-length": 70
   },
   "clock": {
     "format": "󰥔 {:%H:%M}",

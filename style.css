@@ -10,7 +10,7 @@
 window#waybar {
   transition-property: background-color;
   transition-duration: 0.5s;
-  background-color: transparent;
+  background-color: rgba(29, 30, 41, 0.5);
 }
 
 /*
@@ -27,8 +27,8 @@ padding (inner spacing)
     border: solid 0px #cdd6f4;
     font-weight: normal;
     font-style: normal;
-    padding: 0.15rem;
-    margin: 0.15rem 0rem 0rem 0rem;
+    padding: 0.05rem 0.15rem;
+    margin: 0.3rem 0rem 0.55rem 0rem;
 }
 
 #workspaces button {
@@ -66,7 +66,7 @@ padding (inner spacing)
 #custom-wifi,
 #custom-sysinfo,
 #custom-swaync,
-#window {
+#custom-window {
 
   padding: 0.15rem 0.7rem;
   margin: 0.15rem 0.2rem 1rem 0rem;
@@ -183,6 +183,6 @@ padding (inner spacing)
   color: #89b4fa;
 }
 
-#window {
+#custom-window {
   color: #cdd6f4;
 }
