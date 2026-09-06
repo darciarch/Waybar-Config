@@ -13,6 +13,13 @@ window#waybar {
   background-color: rgba(29, 30, 41, 0.5);
 }
 
+/* hyprland/window sets `.empty` on the bar when the active workspace has no
+   windows — drop the translucent base then (module capsules stay). Live toggle,
+   no waybar reload. */
+window#waybar.empty {
+  background-color: transparent;
+}
+
 /*
 margin (outer spacing) = top right bottom left
 padding (inner spacing)
@@ -66,7 +73,7 @@ padding (inner spacing)
 #custom-wifi,
 #custom-sysinfo,
 #custom-swaync,
-#custom-window {
+#window {
 
   padding: 0.1rem 0.7rem;
   margin: 0.15rem 0.2rem 1rem 0rem;
@@ -183,6 +190,11 @@ padding (inner spacing)
   color: #89b4fa;
 }
 
-#custom-window {
+#window {
   color: #cdd6f4;
+}
+
+/* keep the real app icon from being tinted / oversized */
+#window image {
+  margin-right: 0.15rem;
 }

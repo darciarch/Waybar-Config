@@ -11,7 +11,7 @@
   "modules-left": [
     "clock",
     "battery",
-    "custom/window"
+    "hyprland/window"
   ],
 
   "modules-center": [
@@ -38,12 +38,22 @@
       "*": 3
     }
   },
-  "custom/window": {
-    "format": "{}",
-    "exec": "$HOME/.config/waybar/scripts/window.py",
-    "return-type": "json",
-    "escape": false,
-    "max-length": 25
+  // built-in hyprland/window — shows the app name only (title stripped to {class}).
+  // "icon": true renders the real .desktop / icon-theme image; when none resolves,
+  // just the name shows. It also toggles an `empty` CSS class on window#waybar when
+  // the active workspace has no windows — style.css uses that to go transparent,
+  // and the toggle is live (no waybar reload).
+  "hyprland/window": {
+    "format": "{class}",
+    "icon": true,
+    "icon-size": 16,
+    "separate-outputs": true,
+    "max-length": 25,
+    "rewrite": {
+      "^$": "OH HEEL NA!",
+      "([a-z0-9-]+\\.)+([a-z0-9-]+)": "$2"
+    },
+    "tooltip-format": "{title}"
   },
   "clock": {
     "format": "󰥔 {:%H:%M}",
