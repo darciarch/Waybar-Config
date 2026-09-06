@@ -1,7 +1,7 @@
 {
   "layer": "top",
   "position": "top",
-  "height": 20,
+  "height": 1,
   "spacing": 2,
   "exclusive": true,
   "gtk-layer-shell": true,
@@ -10,7 +10,7 @@
 
   "modules-left": [
     "clock",
-    "power-profiles-daemon",
+    "battery",
     "custom/window"
   ],
 
@@ -19,16 +19,17 @@
   ],
 
   "modules-right": [
-    "battery",
     "backlight",
     "wireplumber",
     "custom/uptime",
     "custom/wifi",
+    "power-profiles-daemon",
     "custom/sysinfo",
     "custom/swaync"
   ],
   "hyprland/workspaces": {
     "on-click": "activate",
+    "tooltip": false,
     "format": "{id}",
     "all-outputs": true,
     "disable-scroll": false,
@@ -42,7 +43,7 @@
     "exec": "$HOME/.config/waybar/scripts/window.py",
     "return-type": "json",
     "escape": false,
-    "max-length": 70
+    "max-length": 25
   },
   "clock": {
     "format": "󰥔 {:%H:%M}",

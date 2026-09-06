@@ -11,6 +11,9 @@ in steps with Pango <span size=...>, and prefixes a single fixed window glyph
 (U+F05AF). Empty title keeps the "OH HEEL NA!" easter egg. The module is always
 visible (glyph at minimum). One JSON line per event, flushed.
 
+Font sizes are expressed in px and converted to Pango units; MIN_PX is a hard
+floor, so no step can render smaller than that regardless of the ladder below.
+
 Opens its own socket2 connection, independent of workspace_bar_daemon.py
 (socket2 is multi-client); that daemon is not touched.
 """
@@ -40,6 +43,12 @@ EMPTY_TEXT = "OH HEEL NA!"
 LEADING_MARKS = re.compile(r"^[\s✳●○◆▶*•‣–—]+")
 TRAILING_APP = re.compile(r"\s[—-]\s[^—-]{1,30}$")
 
+# Font sizing. BASE_PX must match `#custom-window { font-size: ... }` in
+# style.css, otherwise the "no span needed" shortcut in px_span() misfires.
+BASE_PX = 13
+MIN_PX = 10  # hard floor — never render smaller than this
+PX_TO_PANGO = 0.75 * 1024  # px -> pt (at 96 DPI) -> Pango units (1/1024 pt)
+
 
 def active_window():
     try:
@@ -58,14 +67,21 @@ def clean_title(title):
     return t.strip()
 
 
+def px_span(esc, px):
+    px = max(px, MIN_PX)
+    if px >= BASE_PX:
+        return esc  # base size, no markup needed
+    return f"<span size='{round(px * PX_TO_PANGO)}'>{esc}</span>"
+
+
 def sized(text):
     esc = html.escape(text)
     n = len(text)
     if n <= 32:
-        return esc
+        return px_span(esc, BASE_PX)
     if n <= 46:
-        return f"<span size='small'>{esc}</span>"
-    return f"<span size='x-small'>{esc}</span>"
+        return px_span(esc, 11)
+    return px_span(esc, 10)
 
 
 def emit(win):
