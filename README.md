@@ -9,6 +9,45 @@ as the notification center (replacing dunst).
 This is a config, not a software project: no build, no tests, no package manager.
 **"Deploying" a change means restarting Waybar.**
 
+## Installation
+
+Arch (or an Arch derivative). Adjust package names for other distros.
+
+```bash
+# 1. Dependencies
+sudo pacman -S --needed \
+    waybar hyprland \
+    jq \
+    networkmanager bluez bluez-utils \
+    swaync \
+    power-profiles-daemon \
+    wireplumber \
+    ttf-jetbrains-mono-nerd
+
+# 2. Get the config (back up any existing ~/.config/waybar first)
+git clone <this-repo> ~/.config/waybar
+chmod +x ~/.config/waybar/scripts/*
+
+# 3. One-time system setup — installs swaync, enables power-profiles-daemon,
+#    masks dunst (needs sudo + a systemd user session)
+~/.config/waybar/scripts/first_time_setup.sh
+
+# 4. Start the bar
+~/.config/waybar/scripts/launch.sh
+```
+
+Everything is driven from Hyprland. Add to `~/.config/hypr/` (Lua or conf, as your setup uses):
+
+- autostart, **in this order**: `swaync &`, then `waybar &`, then
+  `python ~/.config/waybar/scripts/workspace_bar_daemon.py &`
+  (swaync must come before waybar or `custom/swaync` renders empty)
+- `SUPER + A` → `~/.config/waybar/scripts/toggle_workspace_bar.sh` (per-workspace bar hiding)
+
+Python scripts use the standard library only — no `pip install`.
+
+`hyprctl dispatch` on this machine parses its argument as **Lua** (`hl.dsp.*`), not plain strings;
+`scripts/focus.sh` and `~/.config/hypr/swap_workspace.sh` are the reference for that.
+
 ## Commands
 
 ```bash
@@ -19,7 +58,8 @@ This is a config, not a software project: no build, no tests, no package manager
 # Waybar silently drops a module whose JSON is malformed, so always check here after editing.
 killall waybar; waybar
 
-# Reload style.css only, without restarting
+# Reload config + CSS. NOTE: on this build SIGUSR2 is a full reload — it also
+# restarts every custom/* exec, so it is not a cheap "CSS only" refresh.
 killall -SIGUSR2 waybar
 
 # One-time system setup (swaync install, power-profiles-daemon enable, dunst mask) — needs sudo
@@ -39,19 +79,21 @@ killall -SIGUSR2 waybar
 |----------|---------|
 | left     | clock, battery, window (app name + icon) |
 | center   | workspaces |
-| right    | battery, backlight, volume (wireplumber), uptime, wifi, sysinfo, swaync |
+| right    | backlight, volume (wireplumber), uptime, wifi, power-profile, sysinfo, swaync |
 
 - **clock** — `H:M`, calendar in the tooltip
-- **hyprland/window** — the focused app's name plus its real icon; the bar background turns
-  transparent when the active workspace has no windows (live, no reload)
-- **power-profiles-daemon** — click cycles the power profile
+- **custom/window** — the focused app's name (not its title), prefixed with the app's real icon
+  when one resolves from its `.desktop` entry, otherwise a `󰖯` glyph (`scripts/window.py`). The bar
+  background turns transparent when the active workspace has no windows (live, no reload)
 - **battery** — icon + %, color-only warning/critical (no blink)
+- **backlight** — icon + %
 - **volume** — scroll to change; left click mutes output; right click opens `pavucontrol`.
   A mic-off glyph appears after the % when the microphone is muted.
 - **custom/uptime** — shows `uptime -p`; also a stopwatch (left click start/pause, right click reset),
   state shown in the tooltip (`scripts/uptime.sh` + `scripts/stopwatch.sh`)
 - **custom/wifi** — WiFi signal + Bluetooth merged into one tooltip (`scripts/wifi_bt.sh`,
   interface hardcoded to `wlo1`)
+- **power-profiles-daemon** — click cycles the power profile
 - **custom/sysinfo** — CPU + RAM in one icon, exact numbers in the tooltip. The capsule pulses to
   show it is clickable; **clicking it is destructive** — it closes every Hyprland window, then
   relaunches a fixed app set onto workspaces 1/3/4/5 (`scripts/sysinfo.sh` + `scripts/focus.sh`)

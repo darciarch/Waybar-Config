@@ -2,22 +2,30 @@
 """
 window.py — the custom/window backend.
 
-Replaces the built-in hyprland/window module: that one cannot scale the font to
-the title length or strip the app-name suffix. This one listens on Hyprland's
-socket2 (same connect/parse pattern as workspace_bar_daemon.py) and on every
-active-window change re-reads `hyprctl activewindow -j`, cleans the title (drops
-leading status glyphs and a trailing " — App" / " - App" suffix), scales it down
-in steps with Pango <span size=...>, and prefixes a single fixed window glyph
-(U+F05AF). Empty title keeps the "OH HEEL NA!" easter egg. The module is always
-visible (glyph at minimum). One JSON line per event, flushed.
+Shows the focused window's APPLICATION name (not its title). It is prefixed with
+the app's real icon when one can be resolved from its `.desktop` entry, and with
+a fixed window glyph (U+F05AF, 󰖯) as the fallback when it cannot.
 
-Font sizes are expressed in px and converted to Pango units; MIN_PX is a hard
-floor, so no step can render smaller than that regardless of the ladder below.
+The real icon reaches waybar through AIconLabel's embedded-icon escape: a label
+shaped  \\0icon\\1f<icon-name-or-path>\\n<text>  makes waybar render the icon as a
+Gtk::Image and show <text> beside it (see waybar `src/AIconLabel.cpp`,
+`extractIcon`). Those `\\0` `\\1f` `\\n` are the LITERAL two-character sequences
+backslash-zero / backslash-one-f / backslash-n, not control bytes.
 
-Opens its own socket2 connection, independent of workspace_bar_daemon.py
-(socket2 is multi-client); that daemon is not touched.
+waybar re-runs the icon extraction on every module update and strips the escape
+out of the label on the first pass, so re-emitting an unchanged payload makes it
+re-run extraction against the already-cleaned label and drop the image. This
+script therefore DEDUPES — one JSON line per actual change, nothing on a repeat.
+
+Bar transparency on an empty workspace is handled separately by a hidden
+built-in `hyprland/window` module (it toggles `window#waybar.empty`, which
+`style.css` styles); this script only draws the `#custom-window` capsule.
+
+socket2 connect/parse pattern matches `workspace_bar_daemon.py`; own connection,
+independent of that daemon.
 """
 
+import configparser
 import html
 import json
 import os
@@ -29,7 +37,7 @@ import time
 
 # waybar may start us with an ASCII locale; force UTF-8 or the glyph write crashes.
 try:
-    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace", line_buffering=True)
 except Exception:
     pass
 
@@ -37,23 +45,30 @@ RUNTIME = os.environ.get("XDG_RUNTIME_DIR", f"/run/user/{os.getuid()}")
 SIG = os.environ.get("HYPRLAND_INSTANCE_SIGNATURE", "")
 SOCK_PATH = os.path.join(RUNTIME, "hypr", SIG, ".socket2.sock")
 
-GLYPH = "\U000F05AF"  # 󰖯 — fixed window prefix (see CLAUDE.md: escape fragile glyphs)
+GLYPH = "\U000F05AF"  # 󰖯 — fallback window glyph (see CLAUDE.md: escape fragile glyphs)
 EMPTY_TEXT = "OH HEEL NA!"
 
-LEADING_MARKS = re.compile(r"^[\s✳●○◆▶*•‣–—]+")
-TRAILING_APP = re.compile(r"\s[—-]\s[^—-]{1,30}$")
+# waybar AIconLabel embedded-icon markers — LITERAL "\0icon\1f" <name> "\n" <text>
+ICON_HEAD = "\\0icon\\1f"
+ICON_TAIL = "\\n"
 
-# Font sizing. BASE_PX must match `#custom-window { font-size: ... }` in
-# style.css, otherwise the "no span needed" shortcut in px_span() misfires.
-BASE_PX = 13
-MIN_PX = 10  # hard floor — never render smaller than this
-PX_TO_PANGO = 0.75 * 1024  # px -> pt (at 96 DPI) -> Pango units (1/1024 pt)
+# app-name prettifier: strip a reverse-DNS prefix (org.kde.dolphin -> dolphin)
+RDNS = re.compile(r"^(?:[A-Za-z0-9-]+\.)+([A-Za-z0-9-]+)$")
+
+HEARTBEAT = 5.0  # re-check on this timeout too, in case a socket2 event was missed
+                 # (deduped, so a no-op unless the window actually changed)
+
+
+def sh(*args):
+    try:
+        return subprocess.check_output(args, text=True)
+    except Exception:
+        return ""
 
 
 def active_window():
     try:
-        out = subprocess.check_output(["hyprctl", "activewindow", "-j"], text=True)
-        data = json.loads(out)
+        data = json.loads(sh("hyprctl", "activewindow", "-j"))
     except Exception:
         return None
     if not isinstance(data, dict) or not data.get("class"):
@@ -61,53 +76,97 @@ def active_window():
     return data
 
 
-def clean_title(title):
-    t = LEADING_MARKS.sub("", title)
-    t = TRAILING_APP.sub("", t)
-    return t.strip()
+def app_dirs():
+    base = os.environ.get("XDG_DATA_DIRS", "/usr/local/share:/usr/share").split(":")
+    home = os.environ.get("XDG_DATA_HOME") or os.path.expanduser("~/.local/share")
+    out, seen = [], set()
+    for d in (home, *base):
+        p = os.path.join(d, "applications")
+        if p not in seen and os.path.isdir(p):
+            seen.add(p)
+            out.append(p)
+    return out
 
 
-def px_span(esc, px):
-    px = max(px, MIN_PX)
-    if px >= BASE_PX:
-        return esc  # base size, no markup needed
-    return f"<span size='{round(px * PX_TO_PANGO)}'>{esc}</span>"
+def desktop_entry(*app_ids):
+    """[Desktop Entry] section for the first app id that has a .desktop file.
+
+    Matches `<id>.desktop` exactly (case-insensitively) or as a filename suffix
+    (`footclient` -> `org.codeberg.dnkl.footclient.desktop`)."""
+    wants = [f"{a.lower()}.desktop" for a in app_ids if a]
+    if not wants:
+        return None
+    for d in app_dirs():
+        try:
+            files = os.listdir(d)
+        except OSError:
+            continue
+        hit = None
+        for f in files:
+            fl = f.lower()
+            if fl in wants:
+                hit = os.path.join(d, f)
+                break
+            if any(fl.endswith("." + w) for w in wants):
+                hit = os.path.join(d, f)
+        if not hit:
+            continue
+        cp = configparser.RawConfigParser(interpolation=None, strict=False)
+        cp.optionxform = str
+        try:
+            cp.read(hit, encoding="utf-8")
+        except Exception:
+            continue
+        if cp.has_section("Desktop Entry"):
+            return cp["Desktop Entry"]
+    return None
 
 
-def sized(text):
-    esc = html.escape(text)
-    n = len(text)
-    if n <= 32:
-        return px_span(esc, BASE_PX)
-    if n <= 46:
-        return px_span(esc, 11)
-    return px_span(esc, 10)
+def resolve(win):
+    cls = (win.get("class") or "").strip()
+    icls = (win.get("initialClass") or "").strip()
+    ent = desktop_entry(cls, icls)
+
+    name = (ent.get("Name") or "").strip() if ent is not None else ""
+    icon = (ent.get("Icon") or "").strip() if ent is not None else ""
+    if not name:
+        m = RDNS.match(cls)
+        name = m.group(1) if m else (cls or icls or "?")
+    return name, icon
+
+
+def payload(win):
+    if win is None:
+        return {"text": f"{GLYPH} {EMPTY_TEXT}", "class": "empty", "tooltip": ""}
+    name, icon = resolve(win)
+    esc = html.escape(name, quote=False)
+    if icon:
+        text = f"{ICON_HEAD}{icon}{ICON_TAIL}{esc}"
+    else:
+        text = f"{GLYPH} {esc}"
+    return {
+        "text": text,
+        "class": (win.get("class") or "").lower(),
+        "tooltip": win.get("title") or "",
+    }
+
+
+_last = None
 
 
 def emit(win):
-    if win is None:
-        text = EMPTY_TEXT
-        klass = ""
-        tooltip = ""
-    else:
-        raw = win.get("title", "") or ""
-        cleaned = clean_title(raw)
-        text = sized(cleaned) if cleaned else EMPTY_TEXT
-        klass = (win.get("class", "") or "").lower()
-        tooltip = raw
-    payload = {"text": f"{GLYPH} {text}", "class": klass, "tooltip": tooltip}
-    # ensure_ascii=False: waybar's JSON parser wants literal UTF-8, not \u
-    # surrogate-pair escapes for the 4-byte glyph (matches the jq-based scripts).
-    sys.stdout.write(json.dumps(payload, ensure_ascii=False) + "\n")
+    global _last
+    # ensure_ascii=False: waybar's JSON parser wants literal UTF-8, not \u escapes
+    line = json.dumps(payload(win), ensure_ascii=False)
+    if line == _last:
+        return
+    _last = line
+    sys.stdout.write(line + "\n")
     sys.stdout.flush()
 
 
 def refresh():
     emit(active_window())
-
-
-HEARTBEAT = 2.0  # re-emit current state every N s (covers a missed first line
-                 # on waybar startup and keeps the module populated)
 
 
 def main():
@@ -123,7 +182,7 @@ def main():
             continue
 
         sock.settimeout(HEARTBEAT)
-        refresh()  # emit on (re)connect
+        refresh()  # re-check on (re)connect
         buf = b""
         try:
             while True:

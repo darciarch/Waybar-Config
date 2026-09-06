@@ -11,6 +11,7 @@
   "modules-left": [
     "clock",
     "battery",
+    "custom/window",
     "hyprland/window"
   ],
 
@@ -38,22 +39,24 @@
       "*": 3
     }
   },
-  // built-in hyprland/window — shows the app name only (title stripped to {class}).
-  // "icon": true renders the real .desktop / icon-theme image; when none resolves,
-  // just the name shows. It also toggles an `empty` CSS class on window#waybar when
-  // the active workspace has no windows — style.css uses that to go transparent,
-  // and the toggle is live (no waybar reload).
-  "hyprland/window": {
-    "format": "{class}",
-    "icon": true,
+  // custom/window — shows the focused app's NAME (not its title). window.py
+  // resolves the app's real icon from its .desktop entry and passes it through
+  // waybar's embedded-icon escape; when none resolves it falls back to the 󰖯
+  // glyph. See scripts/window.py.
+  "custom/window": {
+    "format": "{}",
+    "exec": "$HOME/.config/waybar/scripts/window.py",
+    "return-type": "json",
+    "escape": false,
     "icon-size": 16,
-    "separate-outputs": true,
-    "max-length": 25,
-    "rewrite": {
-      "^$": "OH HEEL NA!",
-      "([a-z0-9-]+\\.)+([a-z0-9-]+)": "$2"
-    },
-    "tooltip-format": "{title}"
+    "max-length": 25
+  },
+  // hidden built-in — instantiated only for the `window#waybar.empty` class it
+  // toggles when the active workspace has no windows (style.css -> transparent
+  // bar, live, no reload). format:"" keeps it invisible; #window is zeroed in css.
+  "hyprland/window": {
+    "format": "",
+    "separate-outputs": true
   },
   "clock": {
     "format": "󰥔 {:%H:%M}",

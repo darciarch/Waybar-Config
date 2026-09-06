@@ -1,11 +1,9 @@
 #!/bin/bash
-# custom/stopwatch — a stopwatch next to the clock. Only visible while running, or when
-# paused but non-zero (`hide-empty-text: true`).
-#   no args  → returns the current time as mm:ss (or h:mm:ss) JSON  (interval: 1)
-#   toggle   → start / pause   (on-click)
-#   reset    → reset           (on-click-right)
-# State file: ~/.cache/waybar/stopwatch_state  →  "running:start_epoch:accumulated"
-# Dependency: jq.
+# stopwatch state helper — writes ~/.cache/waybar/stopwatch_state
+# ("running:start_epoch:accumulated"). custom/uptime wires its clicks straight here:
+#   toggle → start / pause   (on-click)
+#   reset  → reset            (on-click-right)
+# Display is uptime.sh, which reads the state file directly.
 
 STATE="$HOME/.cache/waybar/stopwatch_state"
 mkdir -p "$(dirname "$STATE")"
@@ -21,28 +19,9 @@ case "$1" in
             echo "0:0:$(( acc + now - start ))" > "$STATE"
         else
             echo "1:${now}:${acc}" > "$STATE"
-        fi
-        exit 0 ;;
+        fi ;;
     reset)
-        echo "0:0:0" > "$STATE"
-        exit 0 ;;
+        echo "0:0:0" > "$STATE" ;;
+    *)
+        echo "usage: stopwatch.sh {toggle|reset}" >&2; exit 1 ;;
 esac
-
-if [[ "$running" == "1" ]]; then
-    e=$(( acc + now - start ))
-else
-    e=$acc
-fi
-
-if [[ "$running" != "1" && "$e" -eq 0 ]]; then
-    exit 0
-fi
-
-if (( e >= 3600 )); then
-    printf -v out '%d:%02d:%02d' $(( e/3600 )) $(( e%3600/60 )) $(( e%60 ))
-else
-    printf -v out '%02d:%02d' $(( e/60 )) $(( e%60 ))
-fi
-
-cls=$([[ "$running" == "1" ]] && echo running || echo paused)
-jq -cn --arg text "$(printf '\uf252') $out" --arg class "$cls" '{text:$text, class:$class}'

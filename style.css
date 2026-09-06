@@ -13,10 +13,19 @@ window#waybar {
   background-color: rgba(29, 30, 41, 0.5);
 }
 
-/* hyprland/window sets `.empty` on the bar when the active workspace has no
-   windows — drop the translucent base then (module capsules stay). Live toggle,
-   no waybar reload. */
+/* The hidden hyprland/window module sets `.empty` on the bar when the active
+   workspace has no windows — drop the translucent base then (module capsules
+   stay). Live toggle, no waybar reload. */
 window#waybar.empty {
+  background-color: transparent;
+}
+
+/* that hidden module renders as #window — it exists only for the class above,
+   so give it no size or chrome of its own */
+#window {
+  padding: 0;
+  margin: 0;
+  min-width: 0;
   background-color: transparent;
 }
 
@@ -73,7 +82,7 @@ padding (inner spacing)
 #custom-wifi,
 #custom-sysinfo,
 #custom-swaync,
-#window {
+#custom-window {
 
   padding: 0.1rem 0.7rem;
   margin: 0.15rem 0.2rem 1rem 0rem;
@@ -190,11 +199,11 @@ padding (inner spacing)
   color: #89b4fa;
 }
 
-#window {
+#custom-window {
   color: #cdd6f4;
 }
 
-/* keep the real app icon from being tinted / oversized */
-#window image {
-  margin-right: 0.15rem;
+/* gap between the resolved app icon and the name */
+#custom-window image {
+  margin-right: 0.35rem;
 }
