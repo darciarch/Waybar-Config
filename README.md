@@ -25,7 +25,7 @@ sudo pacman -S --needed \
     ttf-jetbrains-mono-nerd
 
 # 2. Get the config (back up any existing ~/.config/waybar first)
-git clone <this-repo> ~/.config/waybar
+git clone https://github.com/darciarch/Waybar-Config ~/.config/waybar
 chmod +x ~/.config/waybar/scripts/*
 
 # 3. One-time system setup — installs swaync, enables power-profiles-daemon,
