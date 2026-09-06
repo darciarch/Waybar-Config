@@ -1,0 +1,181 @@
+* {
+  min-height: 0;
+  min-width: 0;
+  font-family: "JetBrainsMono NFP";
+  font-size: 13px;
+  font-weight: 600;
+  /*BURAYA PADDING MARGIN VS EKLEDIGINDE KATLANARAK BUYUYOR EFEKT*/
+}
+
+window#waybar {
+  transition-property: background-color;
+  transition-duration: 0.5s;
+  background-color: transparent;
+}
+
+/*
+margin (DIS BOSLUK) top right bottom left
+PADDING (IC BOSLUK2 )
+sadece 10 px dersen sol sag ust alt heryerden 10px birakir
+margin: 10px 20px; üst/alt = 10px sağ/sol = 20px yapar vay aq
+*/
+
+#workspaces {
+    background: #11111B;
+    padding: 0px 0px;
+    border-radius: 16px;
+    border: solid 0px #cdd6f4;
+    font-weight: normal;
+    font-style: normal;
+    padding: 0.15rem;
+    margin: 0.5rem 0.2rem 0rem 0rem;
+}
+
+#workspaces button {
+    color: #cdd6f4;
+    background-color: transparent;
+    border-radius: 16px;
+    min-width: 30px;
+    transition: all 0.2s ease-in-out;
+}
+
+
+#workspaces button.active {
+    color: #cdd6f4;
+    background-color: #cdd6f4;
+    border-radius: 16px;
+    min-width: 80px;
+    transition: all 0.2s ease-in-out;
+}
+
+#workspaces button:hover {
+    background-color: transparent;
+    color: transparent;
+    border-radius: 16px;
+    min-width: 40px;
+    background-size: 400% 400%;
+}
+
+
+#battery,
+#backlight,
+#wireplumber,
+#custom-focus,
+#custom-uptime,
+#custom-wifi,
+#custom-sysinfo,
+#custom-swaync,
+#window {
+
+  padding: 0.15rem 0.7rem;
+  margin: 0.5rem 0.2rem 0.7rem 0rem;
+  border-radius: 1rem;
+  /* background-color: #181825; */
+  background-color: #1e1e2e;
+}
+
+#clock {
+  padding: 0.15rem 0.7rem 0.15rem 0.7rem;
+  margin: 0.5rem 0.2rem 0.7rem 0.15rem;
+  border-radius: 1rem;
+  /* background-color: #181825; */
+  background-color: #1e1e2e;
+}
+
+/* eski network → custom/wifi (nmcli + bluetoothctl), rengi korunuyor */
+#custom-wifi {
+  color: peru;
+}
+
+/* bağlantı yokken soluk */
+#custom-wifi.disconnected {
+  color: #6c7086;
+}
+
+#custom-uptime{
+  color: seashell;
+}
+
+/* kronometre ipucu — kutu uptime gösterse de aktifken renk değişir (yanıp sönme YOK) */
+#custom-uptime.running {
+  color: #a6e3a1;
+}
+
+#custom-uptime.paused {
+  color: #f9e2af;
+}
+
+#custom-focus{
+  color: #f38ba8;
+  transition: all 0.2s ease-in-out;
+}
+
+/* battery + güç profili tek kapsül gibi bitişik dursun */
+#battery {
+  color: #a6e3a1;
+  border-radius: 1rem 0 0 1rem;
+  margin-right: 0;
+}
+
+/* güç profili (native power-profiles-daemon) — battery'nin sağ ucuna dikişli */
+#power-profiles-daemon {
+  background-color: #1e1e2e;
+  color: #cba6f7;
+  padding: 0.15rem 0.7rem 0.15rem 0.4rem;
+  margin: 0.5rem 0.2rem 0.7rem 0;
+  border-radius: 0 1rem 1rem 0;
+  margin-left: -2px;   /* config spacing:2 dikişini kapat */
+}
+
+/* pil eşikleri — yanıp sönme YOK, sadece renk (config'teki states) */
+#battery.warning {
+  color: #f9e2af;
+}
+
+#battery.critical {
+  color: #f38ba8;
+}
+
+#backlight {
+  color: #f9e2af;
+}
+
+/* eski cpu rengi teal, cpu modülü kalkınca sese devroldu */
+#wireplumber {
+  color: #94e2d5;
+}
+
+/* eski cpu + memory ikilisi → custom/sysinfo (tek ikon) */
+#custom-sysinfo {
+  color: #74c7ec;
+}
+
+#custom-sysinfo.warning {
+  color: #f9e2af;
+}
+
+#custom-sysinfo.critical {
+  color: #f38ba8;
+}
+
+/* bildirim merkezi sayacı (swaync) */
+#custom-swaync {
+  color: #cba6f7;
+}
+
+#clock {
+  color: #74c7ec;
+}
+
+#clock.simpleclock {
+  color: #89b4fa;
+}
+
+#window {
+  color: #cdd6f4;
+}
+
+#custom-focus:hover{
+  color: #74c7ec;
+  padding: 0.15rem 2rem;
+}

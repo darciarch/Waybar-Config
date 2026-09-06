@@ -1,0 +1,163 @@
+{
+  "layer": "top",
+  "position": "top",
+  "height": 39,
+  "spacing": 2,
+  "exclusive": true,
+  "gtk-layer-shell": true,
+  "passthrough": false,
+  "fixed-center": true,
+
+  "modules-left": [
+    "clock",
+    "power-profiles-daemon",
+    "hyprland/window"
+  ],
+
+  "modules-center": [
+    "hyprland/workspaces"
+  ],
+
+  "modules-right": [
+    "battery",
+    "backlight",
+    "wireplumber",
+    "custom/focus",
+    "custom/uptime",
+    "custom/wifi",
+    "custom/sysinfo",
+    "custom/swaync"
+  ],
+  "hyprland/workspaces": {
+    "on-click": "activate",
+    "format": "{id}",
+    "all-outputs": true,
+    "disable-scroll": false,
+    "active-only": false,
+    "persistent-workspaces" : {
+      "*": 3
+    }
+  },
+  "hyprland/window": {
+    "format": "{title}",
+    "max-length": 34,
+    "rewrite": {
+        "^$": "OH HEEL NA!"
+    },
+    "icon" : true,
+    "icon-size" : 16
+  },
+  "clock": {
+    "format": " {:%H:%M}",
+    "calendar": {
+      "format": {
+        "days": "<span weight='normal'>{}</span>",
+        "months": "<span color='#cdd6f4'><b>{}</b></span>",
+        "today": "<span color='#f38ba8' weight='700'><u>{}</u></span>",
+        "weekdays": "<span color='#f9e2af'><b>{}</b></span>",
+        "weeks": "<span color='#a6e3a1'><b>W{}</b></span>"
+      },
+      "mode": "month",
+      "mode-mon-col": 1,
+      "on-scroll": 1
+    },
+    "tooltip-format": "<span color='#cdd6f4' font='Lexend 16'><tt><small>{calendar}</small></tt></span>"
+  },
+  "battery": {
+    "states": {
+      "warning": 20,
+      "critical": 15
+    },
+    "format": "{icon} {capacity}%",
+    "format-charging": "󰂄 {capacity}%",
+    "format-plugged": "󰚥 {capacity}%",
+    "format-icons": {
+      "default": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+      "charging": ["󰢟", "󰢜", "󰂆", "󰂇", "󰂈", "󰢝", "󰂉", "󰢞", "󰂊", "󰂋", "󰂅"]
+    },
+    "format-time": "{H}s {M}dk",
+    "tooltip-format-discharging": "{timeTo}  ·  {power}W",
+    "tooltip-format-charging": "{timeTo}",
+    "tooltip-format-full": "Şarj dolu",
+    "events": {
+      "on-discharging-critical": "notify-send -u critical -a Pil -i battery-caution 'Pil kritik' 'Şarj etmen lazım'"
+    }
+  },
+  "power-profiles-daemon": {
+    "format": "{icon}",
+    "tooltip-format": "Güç profili: {profile}\nTıkla → değiştir",
+    "format-icons": {
+      "default": "󰾅",
+      "performance": "󰓅",
+      "balanced": "󰾅",
+      "power-saver": "󰾆"
+    }
+  },
+  "backlight": {
+    "format": "{icon} {percent}%",
+    "format-icons": ["󰃞", "󰃟", "󰃠"],
+    "tooltip": false
+  },
+  "wireplumber": {
+    "format": "{icon} {volume}%{format_source}",
+    "format-muted": "󰝟{format_source}",
+    "format-bluetooth": "󰂰 {volume}%{format_source}",
+    "format-bluetooth-muted": "󰂲{format_source}",
+    "format-source": "",
+    "format-source-muted": "",
+    "format-icons": ["󰕿", "󰖀", "󰕾"],
+    "scroll-step": 5,
+    "max-volume": 120,
+    "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+    "on-click-right": "pavucontrol",
+    "tooltip-format": "{node_name}  ·  {volume}%"
+  },
+  "custom/uptime": {
+    "format": " {}",
+    "return-type": "json",
+    "exec": "$HOME/.config/waybar/scripts/uptime.sh",
+    "interval": 1,
+    "tooltip": true,
+    "on-click": "$HOME/.config/waybar/scripts/stopwatch.sh toggle",
+    "on-click-right": "$HOME/.config/waybar/scripts/stopwatch.sh reset"
+  },
+  "custom/wifi": {
+    "format": "{}",
+    "return-type": "json",
+    "exec": "$HOME/.config/waybar/scripts/wifi_bt.sh",
+    "interval": 10,
+    "tooltip": true
+  },
+  "custom/sysinfo": {
+    "format": "{}",
+    "return-type": "json",
+    "exec": "$HOME/.config/waybar/scripts/sysinfo.sh",
+    "interval": 2,
+    "tooltip": true
+  },
+  "custom/swaync": {
+    "format": "{icon}",
+    "format-icons": {
+      "notification": "󱅫",
+      "none": "󰂚",
+      "dnd-notification": "󰂛",
+      "dnd-none": "󰂛",
+      "inhibited-notification": "󱅫",
+      "inhibited-none": "󰂚",
+      "dnd-inhibited-notification": "󰂛",
+      "dnd-inhibited-none": "󰂛"
+    },
+    "return-type": "json",
+    "exec-if": "swaync-client -c -sw",
+    "exec": "swaync-client -swb",
+    "on-click": "swaync-client -t -sw",
+    "on-click-right": "swaync-client -d -sw",
+    "escape": true,
+    "tooltip": false
+  },
+  "custom/focus": {
+    "format": "focus",
+    "on-click": "$HOME/.config/waybar/scripts/focus.sh",
+    "tooltip": false
+  }
+}
