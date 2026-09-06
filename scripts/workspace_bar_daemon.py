@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """
-workspace_bar_daemon — SUPER+A "workspace bazlı bar gizleme" mekanizmasının kalıcı
-arka plan parçası. Hyprland socket2'yi dinler; her workspace geçişinde
-~/.cache/waybar/hidden_workspaces listesine bakar ve o workspace "barsız" işaretliyse
-waybar'ı öldürür, değilse (çalışmıyorsa) başlatır.
+workspace_bar_daemon — the persistent background half of the SUPER+A "per-workspace bar
+hiding" mechanism. Listens on Hyprland's socket2; on every workspace switch it checks the
+~/.cache/waybar/hidden_workspaces list and, if that workspace is marked "bar-less", kills
+waybar, otherwise (if not running) starts it.
 
-Waybar'ın runtime "gizle" IPC'si olmadığı için mekanizma kill/relaunch tabanlı.
-SUPER+A anlık geri bildirim için toggle_workspace_bar.sh içinde ayrıca uygulanır;
-bu daemon geçişleri otomatik takip eder. hyprland.lua autostart'ından çalışır.
+Waybar has no runtime "hide" IPC, so the mechanism is kill/relaunch based. SUPER+A also
+applies the change directly in toggle_workspace_bar.sh for instant feedback; this daemon
+then tracks switches automatically. Runs from the hyprland.lua autostart.
 """
 
 import json

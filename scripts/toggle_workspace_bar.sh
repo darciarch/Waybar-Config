@@ -1,7 +1,7 @@
 #!/bin/bash
-# SUPER+A → aktif workspace'i "barsız" işaretle / işareti kaldır ve DEĞİŞİKLİĞİ
-# ANINDA uygula (daemon'u beklemeden). workspace_bar_daemon.py sonraki geçişleri
-# otomatik takip eder. Bağımlılıklar: hyprctl, jq.
+# SUPER+A → mark / unmark the active workspace as "bar-less" and apply the change
+# IMMEDIATELY (without waiting for the daemon). workspace_bar_daemon.py then tracks
+# subsequent switches automatically. Dependencies: hyprctl, jq.
 
 HIDDEN="$HOME/.cache/waybar/hidden_workspaces"
 mkdir -p "$(dirname "$HIDDEN")"

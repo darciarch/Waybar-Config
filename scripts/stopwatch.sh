@@ -1,11 +1,11 @@
 #!/bin/bash
-# custom/stopwatch — saatin yanında kronometre. Sadece çalışırken veya duraklamış
-# ama 0'dan farklıyken görünür (`hide-empty-text: true`).
-#   argümansız  → mevcut süreyi mm:ss (veya s:mm:ss) JSON olarak döner  (interval: 1)
-#   toggle      → başlat / duraklat   (on-click)
-#   reset       → sıfırla             (on-click-right)
-# State dosyası: ~/.cache/waybar/stopwatch_state  →  "running:start_epoch:accumulated"
-# Bağımlılık: jq.
+# custom/stopwatch — a stopwatch next to the clock. Only visible while running, or when
+# paused but non-zero (`hide-empty-text: true`).
+#   no args  → returns the current time as mm:ss (or h:mm:ss) JSON  (interval: 1)
+#   toggle   → start / pause   (on-click)
+#   reset    → reset           (on-click-right)
+# State file: ~/.cache/waybar/stopwatch_state  →  "running:start_epoch:accumulated"
+# Dependency: jq.
 
 STATE="$HOME/.cache/waybar/stopwatch_state"
 mkdir -p "$(dirname "$STATE")"

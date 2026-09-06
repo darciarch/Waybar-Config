@@ -1,26 +1,26 @@
 #!/bin/bash
-# Bir kereye mahsus sistem kurulumu — waybar yenilemesinin sudo/systemd gerektiren
-# parçaları. Elle de çalıştırabilirsin; bu script sadece sırayı toparlıyor.
+# One-time system setup — the parts of the waybar rework that need sudo/systemd.
+# You can also run these by hand; this script just puts them in order.
 set -e
 
-echo ":: swaync kuruluyor (bildirim merkezi, dunst yerine)"
+echo ":: installing swaync (notification center, replaces dunst)"
 sudo pacman -S --needed swaync
 
-echo ":: power-profiles-daemon boot'ta kalıcı olsun"
+echo ":: make power-profiles-daemon persistent at boot"
 sudo systemctl enable --now power-profiles-daemon
 
-echo ":: dunst maskeleniyor (dbus-activated olduğu için 'stop' yetmez)"
+echo ":: masking dunst ('stop' is not enough since it is dbus-activated)"
 systemctl --user mask --now dunst.service
 
-# swaync kendi systemd user servisiyle geliyorsa onu kullan, gelmiyorsa
-# hyprland.lua autostart'ındaki 'swaync &' satırı devreye girer.
+# If swaync ships its own systemd user service, use it; otherwise the
+# 'swaync &' line in the hyprland.lua autostart takes over.
 if systemctl --user list-unit-files swaync.service &>/dev/null; then
-    echo ":: swaync.service enable ediliyor"
+    echo ":: enabling swaync.service"
     systemctl --user enable --now swaync.service
-    echo "   → hyprland.lua'daki 'swaync &' autostart satırını silebilirsin (opsiyonel)"
+    echo "   → you can remove the 'swaync &' autostart line in hyprland.lua (optional)"
 else
-    echo ":: swaync.service yok — hyprland.lua autostart'ı kullanılacak"
+    echo ":: no swaync.service — the hyprland.lua autostart will be used"
     swaync &
 fi
 
-echo ":: bitti. Bar'ı yeniden başlat:  ~/.config/waybar/scripts/launch.sh"
+echo ":: done. Restart the bar:  ~/.config/waybar/scripts/launch.sh"

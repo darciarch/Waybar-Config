@@ -48,7 +48,7 @@
     "icon-size" : 16
   },
   "clock": {
-    "format": " {:%H:%M}",
+    "format": "󰥔 {:%H:%M}",
     "calendar": {
       "format": {
         "days": "<span weight='normal'>{}</span>",
@@ -78,14 +78,14 @@
     "format-time": "{H}s {M}dk",
     "tooltip-format-discharging": "{timeTo}  ·  {power}W",
     "tooltip-format-charging": "{timeTo}",
-    "tooltip-format-full": "Şarj dolu",
+    "tooltip-format-full": "Battery full",
     "events": {
-      "on-discharging-critical": "notify-send -u critical -a Pil -i battery-caution 'Pil kritik' 'Şarj etmen lazım'"
+      "on-discharging-critical": "notify-send -u critical -a Battery -i battery-caution 'Battery critical' 'You need to charge'"
     }
   },
   "power-profiles-daemon": {
     "format": "{icon}",
-    "tooltip-format": "Güç profili: {profile}\nTıkla → değiştir",
+    "tooltip-format": "Power profile: {profile}\nClick → switch",
     "format-icons": {
       "default": "󰾅",
       "performance": "󰓅",
@@ -104,7 +104,8 @@
     "format-bluetooth": "󰂰 {volume}%{format_source}",
     "format-bluetooth-muted": "󰂲{format_source}",
     "format-source": "",
-    "format-source-muted": "",
+    // mic muted → show a mic-off glyph on the right of the volume %, box otherwise unchanged
+    "format-source-muted": " 󰍭",
     "format-icons": ["󰕿", "󰖀", "󰕾"],
     "scroll-step": 5,
     "max-volume": 120,
@@ -113,7 +114,7 @@
     "tooltip-format": "{node_name}  ·  {volume}%"
   },
   "custom/uptime": {
-    "format": " {}",
+    "format": "󰔟 {}",
     "return-type": "json",
     "exec": "$HOME/.config/waybar/scripts/uptime.sh",
     "interval": 1,

@@ -1,17 +1,17 @@
 #!/bin/bash
-# custom/uptime — kutu HER ZAMAN uptime gösterir; kronometre durumu tooltip'te.
-#   argümansız → {text,tooltip,class} JSON döner  (interval: 1)
-# Kronometre tık'ları config.jsonc'de doğrudan stopwatch.sh'e bağlı
-# (on-click → toggle, on-click-right → reset). Bu script yalnızca gösterim.
-# State dosyası: ~/.cache/waybar/stopwatch_state  →  "running:start_epoch:accumulated"
-# Bağımlılık: jq.
+# custom/uptime — the box ALWAYS shows uptime; the stopwatch state lives in the tooltip.
+#   no args → returns {text,tooltip,class} JSON  (interval: 1)
+# Stopwatch clicks are wired straight to stopwatch.sh in config.jsonc
+# (on-click → toggle, on-click-right → reset). This script is display only.
+# State file: ~/.cache/waybar/stopwatch_state  →  "running:start_epoch:accumulated"
+# Dependency: jq.
 
 STATE="$HOME/.cache/waybar/stopwatch_state"
 
-# Kutu metni: mevcut config'teki sed ifadesi birebir korunuyor.
+# Box text: the sed expression from the old config is kept verbatim.
 up=$(uptime -p | sed 's/up //; s/ days,/d/; s/ day,/d/; s/ hours,/h/; s/ hour,/h/; s/ minutes/m/; s/ minute/m/')
 
-# Kronometre glyph'i — CLAUDE.md kuralı: kırılgan glyph'i printf ile üret.
+# Stopwatch glyph — CLAUDE.md rule: build fragile glyphs with printf.
 sw=$(printf '\U000F13AB')   # 󱎫  nf-md-timer
 
 running=0; start=0; acc=0
@@ -30,13 +30,13 @@ printf -v mmss '%02d:%02d' $(( e/60 )) $(( e%60 ))
 
 if [[ "$running" == "1" ]]; then
     cls="running"
-    tip="$sw $mmss çalışıyor  ·  sol tık: duraklat  ·  sağ tık: sıfırla"
+    tip="$sw $mmss running  ·  left click: pause  ·  right click: reset"
 elif (( e > 0 )); then
     cls="paused"
-    tip="$sw $mmss duraklatıldı  ·  sol tık: devam  ·  sağ tık: sıfırla"
+    tip="$sw $mmss paused  ·  left click: resume  ·  right click: reset"
 else
     cls="idle"
-    tip="Kronometre  ·  sol tık: başlat"
+    tip="Stopwatch  ·  left click: start"
 fi
 
 jq -cn --arg text "$up" --arg tooltip "$tip" --arg class "$cls" \

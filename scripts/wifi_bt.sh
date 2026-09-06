@@ -1,10 +1,10 @@
 #!/bin/bash
-# custom/wifi — kompakt WiFi göstergesi (ikon + sinyal %), hover'da WiFi + Bluetooth
-# birlikte tek tooltip'te. Native `network` modülü BT verisi taşıyamadığı için nmcli
-# (NetworkManager) ile bluetoothctl çıktısı burada birleştiriliyor.
-# Bağımlılıklar: nmcli, bluetoothctl, jq.
+# custom/wifi — compact WiFi indicator (icon + signal %), with WiFi + Bluetooth
+# merged into a single tooltip on hover. The native `network` module cannot carry BT
+# data, so nmcli (NetworkManager) and bluetoothctl output are combined here.
+# Dependencies: nmcli, bluetoothctl, jq.
 
-IFACE="wlo1"   # bu makinede sabit (eski config'te yanlışlıkla wlan0 yazıyordu)
+IFACE="wlo1"   # hardcoded on this machine (the old config wrongly used wlan0)
 
 state=$(nmcli -t -f DEVICE,STATE dev status | awk -F: -v i="$IFACE" '$1==i{print $2}')
 
@@ -24,17 +24,17 @@ if [[ "$state" == connected* ]]; then
 else
     class="disconnected"
     text="󰤭"
-    wifi_tip="<b>WiFi</b>  bağlı değil"
+    wifi_tip="<b>WiFi</b>  not connected"
 fi
 
 # --- Bluetooth ---
 powered=$(bluetoothctl show 2>/dev/null | awk '/Powered:/{print $2; exit}')
 if [[ "$powered" != "yes" ]]; then
-    bt_tip="<b>Bluetooth</b>  kapalı"
+    bt_tip="<b>Bluetooth</b>  off"
 else
     connected=$(bluetoothctl devices Connected 2>/dev/null)
     if [[ -z "$connected" ]]; then
-        bt_tip="<b>Bluetooth</b>  bağlı cihaz yok"
+        bt_tip="<b>Bluetooth</b>  no connected devices"
     else
         bt_tip="<b>Bluetooth</b>"
         while read -r _ mac name; do
