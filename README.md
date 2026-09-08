@@ -2,17 +2,17 @@
 
 # Waybar config
 
-A personal [Waybar](https://github.com/Alexays/Waybar) (v0.15.x) status bar for **Hyprland on Arch**,
+A personal [Waybar](https://github.com/Alexays/Waybar) status bar for **Hyprland on Arch**,
 themed [Catppuccin Mocha](https://catppuccin.com/). Paired with [swaync](https://github.com/ErikReider/SwayNotificationCenter)
 as the notification center (replacing dunst).
 
-This is a config, not a software project: no build, no tests, no package manager.
-**"Deploying" a change means restarting Waybar.**
-
+Built against `waybar-git` (AUR), not the official `waybar` package. The setup
+script installs it — and `yay` too, if you have no AUR helper. Note that
+`waybar-git` rebuilds on every system update, which takes a few minutes.
 
 ## Installation
 
-For Arch (or an Arch derivative). Adjust package names for other distros.
+For Arch (or an Arch derivative).
 
 - First, get the config (back up any existing `~/.config/waybar`) -
 
@@ -124,5 +124,6 @@ All installed by `first_time_setup.sh`. This list is just what each one does.
 | `wpctl` (WirePlumber) | volume and mute |
 | `JetBrainsMono Nerd Font` | glyphs in the bar |
 
-Waybar must be built with the power-profiles-daemon module, or the power
-profile icon is silently dropped from the bar.
+`waybar-git` builds with Meson auto-features, so a module is silently dropped
+if its library is missing at build time. If the power profile icon does not
+show up, rebuild waybar-git after the packages above are installed.

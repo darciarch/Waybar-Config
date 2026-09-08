@@ -1,7 +1,6 @@
 #!/bin/bash
-# One-time setup for this waybar config: installs every dependency and does the
-# systemd bits in order. Run as your normal user, NOT with sudo — the script
-# calls sudo itself where it needs root. Safe to re-run.
+# One-time setup for this waybar config. Run as your normal user, NOT with
+# sudo — the script calls sudo itself where it needs root. Safe to re-run.
 set -e
 
 if [ "$EUID" -eq 0 ]; then
@@ -11,13 +10,28 @@ fi
 
 echo ":: installing packages"
 sudo pacman -S --needed \
-    waybar \
     jq \
     networkmanager bluez bluez-utils \
     swaync \
     power-profiles-daemon \
     wireplumber pavucontrol \
     ttf-jetbrains-mono-nerd
+
+if ! command -v yay &>/dev/null && ! command -v paru &>/dev/null; then
+    echo ":: no AUR helper found, installing yay"
+    sudo pacman -S --needed git base-devel
+    tmp=$(mktemp -d)
+    git clone https://aur.archlinux.org/yay.git "$tmp/yay"
+    (cd "$tmp/yay" && makepkg -si --noconfirm)
+    rm -rf "$tmp"
+fi
+
+echo ":: installing waybar-git from the AUR"
+if command -v yay &>/dev/null; then
+    yay -S --needed waybar-git
+else
+    paru -S --needed waybar-git
+fi
 
 echo ":: enabling system services at boot"
 sudo systemctl enable --now NetworkManager
