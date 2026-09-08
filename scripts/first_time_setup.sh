@@ -1,26 +1,40 @@
 #!/bin/bash
-# One-time system setup — the parts of the waybar rework that need sudo/systemd.
-# You can also run these by hand; this script just puts them in order.
+# One-time setup for this waybar config: installs every dependency and does the
+# systemd bits in order. Run as your normal user, NOT with sudo — the script
+# calls sudo itself where it needs root. Safe to re-run.
 set -e
 
-echo ":: installing swaync (notification center, replaces dunst)"
-sudo pacman -S --needed swaync
+if [ "$EUID" -eq 0 ]; then
+    echo "Run this as your normal user, not with sudo." >&2
+    exit 1
+fi
 
-echo ":: make power-profiles-daemon persistent at boot"
+echo ":: installing packages"
+sudo pacman -S --needed \
+    waybar \
+    jq \
+    networkmanager bluez bluez-utils \
+    swaync \
+    power-profiles-daemon \
+    wireplumber pavucontrol \
+    ttf-jetbrains-mono-nerd
+
+echo ":: enabling system services at boot"
+sudo systemctl enable --now NetworkManager
+sudo systemctl enable --now bluetooth.service
 sudo systemctl enable --now power-profiles-daemon
 
 echo ":: masking dunst ('stop' is not enough since it is dbus-activated)"
 systemctl --user mask --now dunst.service
 
 # If swaync ships its own systemd user service, use it; otherwise the
-# 'swaync &' line in the hyprland.lua autostart takes over.
-if systemctl --user list-unit-files swaync.service &>/dev/null; then
+# 'swaync &' line in the hyprland autostart takes over.
+if systemctl --user cat swaync.service &>/dev/null; then
     echo ":: enabling swaync.service"
     systemctl --user enable --now swaync.service
-    echo "   → you can remove the 'swaync &' autostart line in hyprland.lua (optional)"
+    echo "   -> you can drop the 'swaync &' autostart line from hyprland.lua (optional)"
 else
-    echo ":: no swaync.service — the hyprland.lua autostart will be used"
-    swaync &
+    echo ":: no swaync.service — the 'swaync &' hyprland autostart will be used"
 fi
 
-echo ":: done. Restart the bar:  ~/.config/waybar/scripts/launch.sh"
+echo ":: done. Start the bar:  ~/.config/waybar/scripts/launch.sh"

@@ -9,68 +9,66 @@ as the notification center (replacing dunst).
 This is a config, not a software project: no build, no tests, no package manager.
 **"Deploying" a change means restarting Waybar.**
 
+
 ## Installation
 
-Arch (or an Arch derivative). Adjust package names for other distros.
+For Arch (or an Arch derivative). Adjust package names for other distros.
 
-```bash
-# 1. Dependencies
-sudo pacman -S --needed \
-    waybar hyprland \
-    jq \
-    networkmanager bluez bluez-utils \
-    swaync \
-    power-profiles-daemon \
-    wireplumber \
-    ttf-jetbrains-mono-nerd
+- First, get the config (back up any existing `~/.config/waybar`) -
 
-# 2. Get the config (back up any existing ~/.config/waybar first)
-git clone https://github.com/darciarch/Waybar-Config ~/.config/waybar
-chmod +x ~/.config/waybar/scripts/*
-
-# 3. One-time system setup — installs swaync, enables power-profiles-daemon,
-#    masks dunst (needs sudo + a systemd user session)
-~/.config/waybar/scripts/first_time_setup.sh
-
-# 4. Start the bar
-~/.config/waybar/scripts/launch.sh
+```
+$ git clone https://github.com/darciarch/Waybar-Config ~/.config/waybar
 ```
 
-Everything is driven from Hyprland. Add to `~/.config/hypr/` (Lua or conf, as your setup uses):
+- Then, install packages, system services and swaync/dunst setup -
 
-- autostart, **in this order**: `swaync &`, then `waybar &`, then
-  `python ~/.config/waybar/scripts/workspace_bar_daemon.py &`
-  (swaync must come before waybar or `custom/swaync` renders empty)
-- `SUPER + A` → `~/.config/waybar/scripts/toggle_workspace_bar.sh` (per-workspace bar hiding)
-
-Python scripts use the standard library only — no `pip install`.
-
-`hyprctl dispatch` on this machine parses its argument as **Lua** (`hl.dsp.*`), not plain strings;
-`scripts/focus.sh` and `~/.config/hypr/swap_workspace.sh` are the reference for that.
-
-## Commands
-
-```bash
-# Apply changes — kills a running bar, otherwise starts one (manual restart tool)
-~/.config/waybar/scripts/launch.sh
-
-# Validate config + watch runtime errors in the foreground (Ctrl-C to quit).
-# Waybar silently drops a module whose JSON is malformed, so always check here after editing.
-killall waybar; waybar
-
-# Reload config + CSS. NOTE: on this build SIGUSR2 is a full reload — it also
-# restarts every custom/* exec, so it is not a cheap "CSS only" refresh.
-killall -SIGUSR2 waybar
-
-# One-time system setup (swaync install, power-profiles-daemon enable, dunst mask) — needs sudo
-~/.config/waybar/scripts/first_time_setup.sh
 ```
+$ ~/.config/waybar/scripts/first_time_setup.sh
+```
+
+- Finally, start the bar -
+
+```
+$ ~/.config/waybar/scripts/launch.sh
+```
+
+
+## Autostart / Hyprland setup
+
+Add to `~/.config/hypr/hyprland.lua`:
+
+```lua
+-- Autostart — swaync must come before waybar
+hl.exec_once("swaync &")
+hl.exec_once("waybar &")
+hl.exec_once("python ~/.config/waybar/scripts/workspace_bar_daemon.py &")
+
+-- Toggle the bar on the current workspace
+hl.bind("SUPER", "A", hl.dsp.exec("~/.config/waybar/scripts/toggle_workspace_bar.sh"))
+```
+
+Log out and back in.
+
+Python scripts use the standard library only — no `pip install` required.
+
+
+## Restarting the bar
+
+After editing the config, restart the bar:
+
+```
+$ ~/.config/waybar/scripts/launch.sh
+```
+
+Kills a running instance if there is one, otherwise starts a new one.
+
+
 
 ## Layout
 
 - `config.jsonc` — module placement and per-module config (JSONC: comments OK, trailing commas not)
 - `style.css` — GTK3 CSS (not web CSS: no flexbox, no `gap`)
-- `scripts/` — the `custom/*` module backends and helpers (see below)
+- `scripts/` — the `custom/*` module backends and helpers
 - `~/.config/swaync/{config.json,style.css}` — notification center, themed to match the bar
 
 ### Modules
@@ -83,47 +81,48 @@ killall -SIGUSR2 waybar
 
 - **clock** — `H:M`, calendar in the tooltip
 - **custom/window** — the focused app's name (not its title), prefixed with the app's real icon
-  when one resolves from its `.desktop` entry, otherwise a `󰖯` glyph (`scripts/window.py`). The bar
-  background turns transparent when the active workspace has no windows (live, no reload)
+  when one resolves from its `.desktop` entry, otherwise a `󰖯` glyph (`scripts/window.py`).
+  The bar background turns transparent when the active workspace has no windows
 - **battery** — icon + %, color-only warning/critical (no blink)
 - **backlight** — icon + %
-- **volume** — scroll to change; left click mutes output; right click opens `pavucontrol`.
-  A mic-off glyph appears after the % when the microphone is muted.
-- **custom/uptime** — shows `uptime -p`; also a stopwatch (left click start/pause, right click reset),
-  state shown in the tooltip (`scripts/uptime.sh` + `scripts/stopwatch.sh`)
-- **custom/wifi** — WiFi signal + Bluetooth merged into one tooltip (`scripts/wifi_bt.sh`,
-  interface hardcoded to `wlo1`)
+- **volume** — scroll to change, left click mutes output, right click opens `pavucontrol`.
+  A mic-off glyph appears after the % when the microphone is muted
+- **custom/uptime** — shows `uptime -p`, doubles as a stopwatch (left click start/pause,
+  right click reset), state in the tooltip (`scripts/uptime.sh` + `scripts/stopwatch.sh`)
+- **custom/wifi** — WiFi signal + Bluetooth merged into one tooltip (`scripts/wifi_bt.sh`)
 - **power-profiles-daemon** — click cycles the power profile
-- **custom/sysinfo** — CPU + RAM in one icon, exact numbers in the tooltip. The capsule pulses to
-  show it is clickable; **clicking it is destructive** — it closes every Hyprland window, then
-  relaunches a fixed app set onto workspaces 1/3/4/5 (`scripts/sysinfo.sh` + `scripts/focus.sh`)
-- **custom/swaync** — notification counter; click toggles the panel, right click toggles DND
+- **custom/sysinfo** — CPU + RAM in one icon, exact numbers in the tooltip.
+  **Clicking it closes every Hyprland window**, then relaunches a fixed app set onto
+  workspaces 1/3/4/5 (`scripts/sysinfo.sh` + `scripts/focus.sh`)
+- **custom/swaync** — notification counter, click toggles the panel, right click toggles DND
 
-### Mic mute
-
-Not on the bar. Toggle with `XF86AudioMicMute` / F9. The volume capsule shows the muted state.
+Mic mute is not on the bar. Toggle it with `XF86AudioMicMute` / F9 — the volume capsule
+shows the muted state.
 
 ## Per-workspace bar hiding
 
-**SUPER+A** toggles the bar *for the current workspace*: it marks the workspace in
-`~/.cache/waybar/hidden_workspaces` and kills/relaunches Waybar immediately
+`SUPER + A` toggles the bar for the current workspace only. It marks the workspace in
+`~/.cache/waybar/hidden_workspaces`, then kills and relaunches Waybar
 (`scripts/toggle_workspace_bar.sh`).
 
-`scripts/workspace_bar_daemon.py` runs in the background (Hyprland autostart), listens on Hyprland's
-socket2, and kills/relaunches Waybar on every workspace switch to match that file.
+`scripts/workspace_bar_daemon.py` runs in the background, listens on Hyprland's socket2,
+and relaunches Waybar on every workspace switch to match that file.
 
-So a bar that "won't start" may just be a hidden-marked workspace — check
-`~/.cache/waybar/hidden_workspaces`.
+If the bar won't come up, check `~/.cache/waybar/hidden_workspaces` — the workspace may
+be marked hidden.
 
 ## Dependencies
 
-- `jq` — all `custom/*` JSON modules
-- `nmcli` + `bluetoothctl` — `custom/wifi`
-- `swaync-client` — `custom/swaync` and notifications
-- `powerprofilesctl` (power-profiles-daemon, active + enabled) — power profile module;
-  Waybar must be built with the module or it is silently dropped
-- `wpctl` (WirePlumber) — volume and mute
-- `JetBrainsMono Nerd Font` — glyphs in the bar
+All installed by `first_time_setup.sh`. This list is just what each one does.
 
-swaync must start **before** Waybar (it does, from the Hyprland autostart), or `custom/swaync`
-renders empty.
+| Tool | Used by |
+|---------|---------|
+| `jq` | all `custom/*` JSON modules |
+| `nmcli` + `bluetoothctl` | `custom/wifi` |
+| `swaync-client` | `custom/swaync`, notifications |
+| `powerprofilesctl` | power profile module |
+| `wpctl` (WirePlumber) | volume and mute |
+| `JetBrainsMono Nerd Font` | glyphs in the bar |
+
+Waybar must be built with the power-profiles-daemon module, or the power
+profile icon is silently dropped from the bar.
