@@ -9,7 +9,9 @@ IFACE="wlo1"   # hardcoded on this machine (the old config wrongly used wlan0)
 state=$(nmcli -t -f DEVICE,STATE dev status | awk -F: -v i="$IFACE" '$1==i{print $2}')
 
 if [[ "$state" == connected* ]]; then
-    line=$(nmcli -t -f ACTIVE,SSID,SIGNAL dev wifi | awk -F: '$1=="yes"{print; exit}')
+    # --rescan no: plain `nmcli dev wifi` rescans if the last scan is >30s old, so
+    # polling it every 10s kept the radio off-channel ~5s of every ~36s (big throughput dips).
+    line=$(nmcli -t -f ACTIVE,SSID,SIGNAL dev wifi list --rescan no | awk -F: '$1=="yes"{print; exit}')
     ssid=${line#yes:}; ssid=${ssid%:*}
     signal=${line##*:}
     [[ -z "$signal" ]] && signal=0
