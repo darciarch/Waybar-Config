@@ -1,6 +1,6 @@
 #!/bin/bash
 # custom/sysinfo on-click handler — SESSION RESET button.
-# Closes every Hyprland window, then opens a fixed app set onto workspaces 1/3/4/5.
+# Closes every Hyprland window, then opens a fixed app set onto workspaces 1/2/3/4/5/6.
 #
 # NOTE: Hyprland runs a Lua config on this machine; `hyprctl dispatch` no longer accepts
 # plain strings ("closewindow address:0x..", "exec [workspace 1 silent] app") — it parses
